@@ -1,6 +1,7 @@
 import asyncHandler from 'express-async-handler';
 import generateToken from '../utils/generateToken.js';
 import User from '../models/user.js';
+import User from '../models/user.js';
 
 // @desc    Auth user & get token
 // @route   POST /api/users/login
@@ -73,6 +74,20 @@ const getUserProfile = asyncHandler(async (req, res) => {
     } else {
         res.status(404);
         throw new Error('User not found');
+    }
+});
+
+const forgotPassword = asyncHandler(async (req, res) => {
+    const { email } = req.body;
+
+    const user = await User.findById(email);
+
+    if(user){
+        
+    }
+    else {
+        res.status(404);
+        throw new Error('Email not found');
     }
 });
 
