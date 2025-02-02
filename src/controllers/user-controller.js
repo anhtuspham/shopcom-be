@@ -1,8 +1,14 @@
 import asyncHandler from "express-async-handler";
-import generateToken from "../utils/generateToken.js";
+import {
+  generateOtp,
+  generateOtpAndSendEmail,
+  generateToken,
+} from "../utils/generateData.js";
 import jwt from "jsonwebtoken";
-import User from "../models/user.js";
-import {sendEmail} from "../utils/email.js"
+import { sendEmail } from "../utils/email.js";
+
+import Otp from "../models/Otp.js";
+import User from "../models/User.js";
 
 // @desc    Auth user & get token
 // @route   POST /api/users/login
@@ -35,7 +41,7 @@ const registerUser = asyncHandler(async (req, res) => {
   const userExists = await User.findOne({ email });
 
   if (userExists) {
-    res.status(400);
+    res.status(400).json({ error: "User already exists" });
     throw new Error("User already exists");
   }
 
@@ -44,6 +50,8 @@ const registerUser = asyncHandler(async (req, res) => {
     email,
     password,
   });
+
+  await generateOtpAndSendEmail(email);
 
   if (user) {
     res.status(201).json({
@@ -54,10 +62,34 @@ const registerUser = asyncHandler(async (req, res) => {
       token: generateToken(user._id),
     });
   } else {
-    res.status(400);
+    res.status(400).json({ error: "Invalid user data" });
     throw new Error("Invalid user data");
   }
 });
+
+const verifyOtp = async (req, res) => {
+  const { email, otp } = req.body;
+
+  const user = await User.findOne({ email });
+
+  const userId = user._id;
+
+  if (!userId || !otp) {
+    return res.status(400).json({ error: "Có lỗi xảy ra" });
+  }
+
+  const otpRecord = await Otp.findOne({ userId, otp });
+
+  if (!otpRecord) {
+    return res.status(400).json({ error: "OTP không hợp lệ." });
+  }
+
+  await User.findByIdAndUpdate(userId, { isVerifiedEmail: true });
+
+  await Otp.findByIdAndDelete(otpRecord._id);
+
+  res.status(200).json({ message: "Xác thực email thành công" });
+};
 
 // @desc    Get user profile
 // @route   GET /api/users/profile
@@ -73,14 +105,14 @@ const getUserProfile = asyncHandler(async (req, res) => {
       isAdmin: user.isAdmin,
     });
   } else {
-    res.status(404);
+    res.status(404).json({ error: "User not found" });
     throw new Error("User not found");
   }
 });
 
 const forgotPassword = asyncHandler(async (req, res) => {
   console.log(process.env.PORT);
-  
+
   const { email } = req.body;
 
   const user = await User.findOne({ email });
@@ -93,8 +125,8 @@ const forgotPassword = asyncHandler(async (req, res) => {
   const resetLink = `${process.env.FRONT_END_PORT}/auth/reset-password?token=${token}`;
   await sendEmail(
     email,
-    "Đặt lại mật khẩu",
-    `<p>Chào bạn,</p>
+    `Hi ${user.name}!`,
+    `Your verification code is ``<p>Chào bạn,</p>
             <p>Vui lòng nhấn vào liên kết sau để đặt lại mật khẩu:</p>
             <a href="${resetLink}">Đặt lại mật khẩu</a>`
   );
@@ -109,12 +141,18 @@ const verifyEmail = asyncHandler(async (req, res) => {
     const user = await User.findByIdAndUpdate(decoded.id, { verified: true });
 
     res.redirect(`${process.env.FRONT_END_PORT}/auth/login`);
-  }
-  catch (error){
+  } catch (error) {
     console.error(error);
     res.status(400).json({ error: "Token không hợp lệ." });
     return;
   }
 });
 
-export { authUser, registerUser, getUserProfile, verifyEmail, forgotPassword };
+export {
+  authUser,
+  registerUser,
+  getUserProfile,
+  verifyEmail,
+  forgotPassword,
+  verifyOtp,
+};
