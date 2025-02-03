@@ -13,28 +13,31 @@ export const generateOtp = () => {
   return Math.floor(100000 + Math.random() * 900000).toString();
 };
 
-export async function generateOtpAndSendEmail(email) {
+export async function generateOtpAndSendEmail({email, isVerifiedEmail = false, isForgotPassword = false}) {
   try {
-    const user = await User.findOne({email: email});
+    const textHeader = isVerifiedEmail ? "xác minh tài khoản" : isForgotPassword ? "lấy lại mật khẩu" : "Đăng ký tài khoản";
+    const textTypeOtp = isVerifiedEmail ? 'register' : isForgotPassword ? 'forgotPassword' : 'null';
+
+    const user = await User.findOne({email});
     if (!user) {
       throw new Error("Email không tồn tại");
     }
-    const userId = user._id;
 
-    await Otp.findOneAndDelete({ userId });
+    const userId = user._id;
+    await Otp.findOneAndDelete({ userId: userId, typeOtp: textTypeOtp });
     const otp = generateOtp();
 
-    await Otp.create({ userId: user._id, otp: otp });
-    const subject = "Mã xác minh tài khoản";
+    await Otp.create({ userId: user._id, typeOtp: textTypeOtp, otp: otp });
+    const subject = "Mã xác minh";
     const content = `
       <html>
         <body>
           <p>Xin chào ${user.name}
-          <p>Để xác minh tài khoản của bạn, vui lòng nhập mã OTP dưới đây:</p>
+          <p>Để ${textHeader} của bạn, vui lòng nhập mã OTP dưới đây:</p>
           <p style="font-size: 25px; font-weight: bold; color:rgb(19, 163, 26); padding: 10px; background-color: #f4f4f9; border-radius: 5px; text-align: center;">
             ${otp}
           </p>
-          <p>Vui lòng nhập mã này trong ứng dụng để hoàn tất quá trình xác minh tài khoản.</p>
+          <p>Vui lòng nhập mã này trong ứng dụng để hoàn tất quá trình ${textHeader}.</p>
           <p>Trân trọng,</p>
           <p>Shopcom</p>
         </body>

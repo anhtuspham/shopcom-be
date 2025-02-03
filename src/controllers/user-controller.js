@@ -49,7 +49,13 @@ const registerUser = asyncHandler(async (req, res) => {
     password,
   });
 
-  await generateOtpAndSendEmail(email);
+  console.log(`user ${user}`);
+
+  await generateOtpAndSendEmail({
+    email: email,
+    isVerifiedEmail: true,
+    isForgotPassword: false,
+  });
 
   if (user) {
     res.status(201).json({
@@ -65,12 +71,11 @@ const registerUser = asyncHandler(async (req, res) => {
   }
 });
 
-const verifyOtp = async (req, res) => {
+const verifyOtpEmail = async (req, res) => {
   const { email, otp } = req.body;
 
   const user = await User.findOne({ email });
-
-  if(!user) {
+  if (!user) {
     console.error("Người dùng không tồn tại");
     return res.status(404).json({ message: "Email không tồn tại." });
   }
@@ -81,7 +86,6 @@ const verifyOtp = async (req, res) => {
   }
 
   const otpRecord = await Otp.findOne({ userId, otp });
-
   if (!otpRecord) {
     return res.status(400).json({ message: "OTP không hợp lệ." });
   }
@@ -93,9 +97,53 @@ const verifyOtp = async (req, res) => {
 
 const resendOtpVerifyEmail = asyncHandler(async (req, res) => {
   const { email } = req.body;
+  await generateOtpAndSendEmail({ email: email, isForgotPassword: true });
 
-  await generateOtpAndSendEmail(email);
+  res.status(200).json({ message: "Mã xác minh đã được gửi." });
+});
 
+const verifyOtpPassword = async (req, res) => {
+  const { email, otp } = req.body;
+
+  const user = await User.findOne({ email });
+
+  if (!user) {
+    console.error("Người dùng không tồn tại");
+    return res.status(404).json({ message: "Email không tồn tại." });
+  }
+  const userId = user._id;
+
+  if (!userId || !otp) {
+    return res
+      .status(400)
+      .json({ error: "Thiếu dữ liệu cần thiết để xác thực OTP" });
+  }
+
+  const otpRecord = await Otp.findOne({ userId, otp });
+
+  if (!otpRecord) {
+    return res
+      .status(400)
+      .json({ message: "OTP không hợp lệ hoặc đã hết hạn." });
+  }
+
+  await User.findByIdAndUpdate(userId, { isForgotPassword: false });
+  await Otp.findByIdAndDelete(otpRecord._id);
+  res
+    .status(200)
+    .json({ message: "OTP đã xác thực. Hãy đặt lại mật khẩu của bạn" });
+};
+
+const forgotPassword = asyncHandler(async (req, res) => {
+  const { email } = req.body;
+
+  const user = await User.findOne({ email });
+
+  await User.findOneAndUpdate({ email }, { isForgotPassword: true });
+
+  if (!user) return res.status(404).json({ message: "Email không tồn tại." });
+
+  await generateOtpAndSendEmail({ email: email, isForgotPassword: true });
   res.status(200).json({ message: "Mã xác minh đã được gửi." });
 });
 
@@ -118,48 +166,16 @@ const getUserProfile = asyncHandler(async (req, res) => {
   }
 });
 
-const forgotPassword = asyncHandler(async (req, res) => {
-  const { email } = req.body;
-
-  const user = await User.findOne({ email });
-  if (!user) return res.status(404).json({ message: "Email không tồn tại." });
-
-  const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
-    expiresIn: "1h",
-  });
-
-  const resetLink = `${process.env.FRONT_END_PORT}/auth/reset-password?token=${token}`;
-  await sendEmail(
-    email,
-    `Hi ${user.name}!`,
-    `Your verification code is ``<p>Chào bạn,</p>
-            <p>Vui lòng nhấn vào liên kết sau để đặt lại mật khẩu:</p>
-            <a href="${resetLink}">Đặt lại mật khẩu</a>`
-  );
-
-  res.status(200).json({ message: "Email đặt lại mật khẩu đã được gửi." });
-});
-
-const verifyEmail = asyncHandler(async (req, res) => {
-  try {
-    const token = req.params.token;
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    const user = await User.findByIdAndUpdate(decoded.id, { verified: true });
-
-    res.redirect(`${process.env.FRONT_END_PORT}/auth/login`);
-  } catch (error) {
-    console.error(error);
-    res.status(400).json({ error: "Token không hợp lệ." });
-    return;
-  }
-});
+// const updatePassword = asyncHandler(async (req, res) => {
+//   const {}
+// });
 
 export {
   authUser,
   registerUser,
   getUserProfile,
-  verifyEmail,
   forgotPassword,
-  verifyOtp,
-  resendOtpVerifyEmail
+  verifyOtpEmail,
+  verifyOtpPassword,
+  resendOtpVerifyEmail,
 };
