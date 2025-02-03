@@ -1,6 +1,5 @@
 import asyncHandler from "express-async-handler";
 import {
-  generateOtp,
   generateOtpAndSendEmail,
   generateToken,
 } from "../utils/generateData.js";
@@ -39,7 +38,6 @@ const registerUser = asyncHandler(async (req, res) => {
   const { name, email, password } = req.body;
 
   const userExists = await User.findOne({ email });
-
   if (userExists) {
     res.status(400).json({ error: "User already exists" });
     throw new Error("User already exists");
@@ -72,6 +70,10 @@ const verifyOtp = async (req, res) => {
 
   const user = await User.findOne({ email });
 
+  if(!user) {
+    console.error("Người dùng không tồn tại");
+    return res.status(404).json({ message: "Email không tồn tại." });
+  }
   const userId = user._id;
 
   if (!userId || !otp) {
@@ -81,15 +83,21 @@ const verifyOtp = async (req, res) => {
   const otpRecord = await Otp.findOne({ userId, otp });
 
   if (!otpRecord) {
-    return res.status(400).json({ error: "OTP không hợp lệ." });
+    return res.status(400).json({ message: "OTP không hợp lệ." });
   }
 
   await User.findByIdAndUpdate(userId, { isVerifiedEmail: true });
-
   await Otp.findByIdAndDelete(otpRecord._id);
-
   res.status(200).json({ message: "Xác thực email thành công" });
 };
+
+const resendOtpVerifyEmail = asyncHandler(async (req, res) => {
+  const { email } = req.body;
+
+  await generateOtpAndSendEmail(email);
+
+  res.status(200).json({ message: "Mã xác minh đã được gửi." });
+});
 
 // @desc    Get user profile
 // @route   GET /api/users/profile
@@ -111,12 +119,10 @@ const getUserProfile = asyncHandler(async (req, res) => {
 });
 
 const forgotPassword = asyncHandler(async (req, res) => {
-  console.log(process.env.PORT);
-
   const { email } = req.body;
 
   const user = await User.findOne({ email });
-  if (!user) return res.status(404).json({ error: "Email không tồn tại." });
+  if (!user) return res.status(404).json({ message: "Email không tồn tại." });
 
   const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
     expiresIn: "1h",
@@ -155,4 +161,5 @@ export {
   verifyEmail,
   forgotPassword,
   verifyOtp,
+  resendOtpVerifyEmail
 };

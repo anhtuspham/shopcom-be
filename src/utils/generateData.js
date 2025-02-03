@@ -1,6 +1,9 @@
 import jwt from "jsonwebtoken";
+
 import Otp from "../models/Otp.js";
 import User from "../models/User.js";
+
+import { sendEmail } from "./email.js";
 
 export const generateToken = (id) => {
   return jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn: "30d" });
@@ -12,11 +15,13 @@ export const generateOtp = () => {
 
 export async function generateOtpAndSendEmail(email) {
   try {
-    const user = User.findOne(email);
+    const user = await User.findOne({email: email});
+    if (!user) {
+      throw new Error("Email không tồn tại");
+    }
     const userId = user._id;
 
     await Otp.findOneAndDelete({ userId });
-
     const otp = generateOtp();
 
     await Otp.create({ userId: user._id, otp: otp });
@@ -24,7 +29,7 @@ export async function generateOtpAndSendEmail(email) {
     const content = `
       <html>
         <body>
-          <p>Chào bạn,</p>
+          <p>Xin chào ${user.name}
           <p>Để xác minh tài khoản của bạn, vui lòng nhập mã OTP dưới đây:</p>
           <p style="font-size: 25px; font-weight: bold; color:rgb(19, 163, 26); padding: 10px; background-color: #f4f4f9; border-radius: 5px; text-align: center;">
             ${otp}
