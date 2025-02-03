@@ -5,13 +5,14 @@ import { protect } from '../middleware/auth-middleware.js';
 const router = express.Router();
 
 router.post('/login', authUser);
-router.get('/profile', protect, getUserProfile);
 
 router.post('/register', registerUser);
-router.post('/verifyOtp', verifyOtpEmail);
-router.post('/resendOtpVerifyEmail', resendOtpVerifyEmail);
+router.post('/verify-otp', verifyOtpEmail);
+router.post('/resend-otp-verify-email', resendOtpVerifyEmail);
 
-router.post('/forgotPassword', forgotPassword);
-router.post('/verifyOtpPassword', verifyOtpPassword);
+router.post('/forgot-password', forgotPassword);
+router.post('/verify-otp-password', verifyOtpPassword);
+
+router.get('/profile', protect, getUserProfile);
 
 export default router;

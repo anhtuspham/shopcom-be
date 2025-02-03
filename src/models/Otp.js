@@ -5,8 +5,8 @@ const otpSchema = new mongoose.Schema({
   otp: { type: String, required: true },
   typeOtp: {
     type: String,
-    enum: ["register", "forgotPassword", "null"],
-    default: "register",
+    enum: ["verifiedEmail", "forgotPassword", "null"],
+    default: "verifiedEmail",
   },
   createdAt: { type: Date, default: Date.now, expires: 300 },
 });

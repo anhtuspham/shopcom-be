@@ -16,7 +16,7 @@ export const generateOtp = () => {
 export async function generateOtpAndSendEmail({email, isVerifiedEmail = false, isForgotPassword = false}) {
   try {
     const textHeader = isVerifiedEmail ? "xác minh tài khoản" : isForgotPassword ? "lấy lại mật khẩu" : "Đăng ký tài khoản";
-    const textTypeOtp = isVerifiedEmail ? 'register' : isForgotPassword ? 'forgotPassword' : 'null';
+    const textTypeOtp = isVerifiedEmail ? 'verifiedEmail' : isForgotPassword ? 'forgotPassword' : 'null';
 
     const user = await User.findOne({email});
     if (!user) {

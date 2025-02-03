@@ -96,8 +96,10 @@ const verifyOtpEmail = async (req, res) => {
 };
 
 const resendOtpVerifyEmail = asyncHandler(async (req, res) => {
-  const { email } = req.body;
-  await generateOtpAndSendEmail({ email: email, isForgotPassword: true });
+  const { email, otpType } = req.body;
+  const isVerifiedEmail = otpType === 'verifiedEmail';
+  const isForgotPassword = otpType === 'forgotPassword';
+  await generateOtpAndSendEmail({ email: email, isForgotPassword: isForgotPassword, isVerifiedEmail: isVerifiedEmail });
 
   res.status(200).json({ message: "Mã xác minh đã được gửi." });
 });
