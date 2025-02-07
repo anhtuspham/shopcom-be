@@ -6,7 +6,11 @@ import User from "../models/User.js";
 import { sendEmail } from "./email.js";
 
 export const generateToken = (id) => {
-  return jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn: "30d" });
+  return jwt.sign({ id, purpose: 'register'}, process.env.JWT_SECRET, { expiresIn: "30d" });
+};
+
+export const generateResetPasswordToken = (id) => {
+  return jwt.sign({ id, purpose: 'resetPassword'}, process.env.JWT_SECRET, { expiresIn: "15m" });
 };
 
 export const generateOtp = () => {

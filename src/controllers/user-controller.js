@@ -1,6 +1,7 @@
 import asyncHandler from "express-async-handler";
 import {
   generateOtpAndSendEmail,
+  generateResetPasswordToken,
   generateToken,
 } from "../utils/generateData.js";
 import jwt from "jsonwebtoken";
@@ -17,6 +18,11 @@ const authUser = asyncHandler(async (req, res) => {
 
   const user = await User.findOne({ email });
 
+  if(!user) {
+    res.status(404).json({ message: "Người dùng không tồn tại" });
+    throw new Error("Người dùng không tồn tại");
+  }
+
   if (user && (await user.matchPassword(password))) {
     res.json({
       _id: user._id,
@@ -26,8 +32,8 @@ const authUser = asyncHandler(async (req, res) => {
       token: generateToken(user._id),
     });
   } else {
-    res.status(401);
-    throw new Error("Invalid email or password");
+    res.status(401).json({ messsage: "Email hoặc mật khẩu không hợp lệ" });
+    throw new Error("Email hoặc mật khẩu không hợp lệ");
   }
 });
 
@@ -95,12 +101,34 @@ const verifyOtpEmail = async (req, res) => {
   res.status(200).json({ message: "Xác thực email thành công" });
 };
 
-const resendOtpVerifyEmail = asyncHandler(async (req, res) => {
+const resendOtp = asyncHandler(async (req, res) => {
   const { email, otpType } = req.body;
-  const isVerifiedEmail = otpType === 'verifiedEmail';
-  const isForgotPassword = otpType === 'forgotPassword';
-  await generateOtpAndSendEmail({ email: email, isForgotPassword: isForgotPassword, isVerifiedEmail: isVerifiedEmail });
+  const isVerifiedEmail = otpType === "verifiedEmail";
+  const isForgotPassword = otpType === "forgotPassword";
 
+  if (!isVerifiedEmail && !isForgotPassword) {
+    return res.status(400).json({ message: "Loại OTP không hợp lệ" });
+  }
+
+  await generateOtpAndSendEmail({
+    email: email,
+    isForgotPassword: isForgotPassword,
+    isVerifiedEmail: isVerifiedEmail,
+  });
+
+  res.status(200).json({ message: "Mã xác minh đã được gửi." });
+});
+
+const forgotPassword = asyncHandler(async (req, res) => {
+  const { email } = req.body;
+
+  const user = await User.findOne({ email });
+
+  await User.findOneAndUpdate({ email }, { isForgotPassword: true });
+
+  if (!user) return res.status(404).json({ message: "Email không tồn tại." });
+
+  await generateOtpAndSendEmail({ email: email, isForgotPassword: true });
   res.status(200).json({ message: "Mã xác minh đã được gửi." });
 });
 
@@ -111,7 +139,7 @@ const verifyOtpPassword = async (req, res) => {
 
   if (!user) {
     console.error("Người dùng không tồn tại");
-    return res.status(404).json({ message: "Email không tồn tại." });
+    return res.status(404).json({ message: "Người dùng không tồn tại." });
   }
   const userId = user._id;
 
@@ -133,20 +161,62 @@ const verifyOtpPassword = async (req, res) => {
   await Otp.findByIdAndDelete(otpRecord._id);
   res
     .status(200)
-    .json({ message: "OTP đã xác thực. Hãy đặt lại mật khẩu của bạn" });
+    .json({
+      message: "OTP đã xác thực. Hãy đặt lại mật khẩu của bạn",
+      email: email,
+      token: generateResetPasswordToken(userId),
+    });
 };
 
-const forgotPassword = asyncHandler(async (req, res) => {
-  const { email } = req.body;
+const resetPassword = asyncHandler(async (req, res) => {
+  const {token, newPassword, confirmNewPassword} = req.body;
 
-  const user = await User.findOne({ email });
+  if(newPassword !== confirmNewPassword) {
+    return res.status(400).json({ message: "Mật khẩu và xác nhận mật khẩu không giống nhau." });
+  }
 
-  await User.findOneAndUpdate({ email }, { isForgotPassword: true });
+  const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-  if (!user) return res.status(404).json({ message: "Email không tồn tại." });
+  if(decoded.purpose !== "resetPassword") {
+    return res.status(400).json({ message: "Token không hợp lệ" });
+  }
 
-  await generateOtpAndSendEmail({ email: email, isForgotPassword: true });
-  res.status(200).json({ message: "Mã xác minh đã được gửi." });
+  const user = await User.findById(decoded.id);
+  if(!user) {
+    return res.status(404).json({ message: "Người dùng không tồn tại" });
+  };
+  user.password = newPassword;
+  user.markModified('password');
+  await user.save();
+
+  res.status(200).json({ message: "Mật khẩu đã được cập nhật thành công" });
+});
+
+const updatePassword = asyncHandler(async (req, res) => {
+  const { email, oldPassword, password, confirmPassword } = req.body;
+
+  if(!email || !oldPassword || !password || !confirmPassword) {
+    return res.status(400).json({ message: "Thiếu dữ liệu" });
+  }
+
+  const user = await User.findOne({ email: email });
+  if(!user) {
+    return res.status(404).json({ message: "Người dùng không tồn tại" });
+  }
+
+  if (!password || !confirmPassword || password !== confirmPassword) {
+    return res.status(400).json({ message: "Mật khẩu và xác nhận mật khẩu không giống nhau." });
+  }
+
+  if(await user.matchPassword(oldPassword)) {
+    user.password = password;
+    user.markModified('password');
+    await user.save();
+    
+    return res.status(200).json({ message: "Mật khẩu cập nhật thành công", user: user});
+  } else {
+    return res.status(400).json({ message: "Mật khẩu không chính xác" });
+  }
 });
 
 // @desc    Get user profile
@@ -168,10 +238,6 @@ const getUserProfile = asyncHandler(async (req, res) => {
   }
 });
 
-// const updatePassword = asyncHandler(async (req, res) => {
-//   const {}
-// });
-
 export {
   authUser,
   registerUser,
@@ -179,5 +245,7 @@ export {
   forgotPassword,
   verifyOtpEmail,
   verifyOtpPassword,
-  resendOtpVerifyEmail,
+  resendOtp,
+  updatePassword,
+  resetPassword
 };
