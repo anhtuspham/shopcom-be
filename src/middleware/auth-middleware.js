@@ -13,13 +13,13 @@ const protect = asyncHandler(async (req, res, next) => {
             next();
         } catch (error) {
             console.error(error);
-            res.status(401);
+            res.status(401).json({ message: `You dont't have permission to do this` });
             throw new Error('Not authorized, token failed');
         }
     }
 
     if (!token) {
-        res.status(401);
+        res.status(401).json({ message: `You dont't have permission to do this` });
         throw new Error('Not authorized, no token');
     }
 });
