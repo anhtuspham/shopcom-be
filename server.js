@@ -3,6 +3,7 @@ import dotenv from "dotenv";
 import connectDB from "./src/config/db.js";
 
 import userRouter from "./src/routes/user-routes.js";
+import productRouter from "./src/routes/product-routes.js";
 
 dotenv.config();
 
@@ -14,6 +15,7 @@ const app = express();
 app.use(express.json());
 
 app.use("/api/users", userRouter);
+app.use("/api/products", productRouter);
 
 app.use((err, req, res, next) => {
   console.error("Error:", err);
