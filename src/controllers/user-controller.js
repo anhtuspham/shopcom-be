@@ -5,7 +5,6 @@ import {
   generateToken,
 } from "../utils/generateData.js";
 import jwt from "jsonwebtoken";
-import { sendEmail } from "../utils/email.js";
 
 import Otp from "../models/Otp.js";
 import User from "../models/User.js";
