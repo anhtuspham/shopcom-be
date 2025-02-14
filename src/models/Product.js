@@ -1,5 +1,14 @@
 import mongoose, { mongo } from "mongoose";
 
+const variantSchema = new mongoose.Schema({
+    color: String,
+    ram: String,
+    rom: String,
+    price: {type: String, required: true},
+    stock: {type: Number, required: true, min: 0, max: 100, default: 0},
+    images: [String]
+})
+
 const productSchema = new mongoose.Schema({
     name: {
         type: String,
@@ -10,35 +19,17 @@ const productSchema = new mongoose.Schema({
         type: String,
         required: true
     },
-    price: {
-        type: Number,
-        required: true,
-        min: 0
-    },
     category: {
         type: String,
         required: true,
-        enum: ['Laptop', 'Smartphone', 'Tablet', 'Accessories', 'Other']
+        enum: ['Laptop', 'Smartphone', 'Tablet', 'Headphone']
     },
     brand: {
         type: String,
         required: true,
         trim: true
     },
-    stock: {
-        type: Number,
-        required: true,
-        min: 0,
-        default: 0
-    },
-    images: [{
-        type: String,
-        required: true
-    }],
-    specifications: {
-        type: Map,
-        of: String
-    },
+    variants: [variantSchema],
     ratings: {
         average: {
             type: Number,

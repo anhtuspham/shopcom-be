@@ -7,16 +7,15 @@ import { promisify } from "util";
 const unlinkAsync = promisify(fs.unlink);
 
 const createProduct = asyncHandler(async (req, res) => {
-  const { name, description, price, category, brand, stock, specifications } =
+  const { name, description, category, brand, variants } =
     req.body;
+
+    if(!name)
 
   if (!req.file)
     return res
       .status(404)
-      .json({ message: "Hãy tải lên ít nhất một hình ảnh" });
-
-    console.log(`file ${req.file.path}`);
-    
+      .json({ message: "Hãy tải lên ít nhất một hình ảnh" });    
 
   try {
     const result = await cloudinary.uploader.upload(req.file.path);
@@ -30,7 +29,7 @@ const createProduct = asyncHandler(async (req, res) => {
       category,
       brand,
       stock,
-      // specifications: JSON.parse(specifications || "{}"),
+      specifications: validSpecification,
       images: [result.secure_url],
     });
     await newProduct.save();
@@ -44,4 +43,15 @@ const createProduct = asyncHandler(async (req, res) => {
   }
 });
 
-export { createProduct };
+const updateProduct = asyncHandler(async(req, res) => {
+  const {id} = req.body;
+  const product = await Product.findById(id);
+
+  if(!product){
+    return res.status(404).json({message: "Không tìm thấy sản phẩm"});
+  }
+
+  const {name, description, price, category, brand, stock, specifications} = req.body;
+})
+
+export { createProduct, updateProduct };
