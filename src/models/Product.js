@@ -6,7 +6,6 @@ const variantSchema = new mongoose.Schema({
     rom: String,
     price: {type: String, required: true},
     stock: {type: Number, required: true, min: 0, max: 100, default: 0},
-    images: [String]
 })
 
 const productSchema = new mongoose.Schema({
@@ -42,6 +41,10 @@ const productSchema = new mongoose.Schema({
             default: 0
         }
     },
+    images: [{
+        type: String,
+        required: true,
+    }],
     isActive: {
         type: Boolean,
         default: true
