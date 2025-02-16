@@ -1,6 +1,9 @@
 import mongoose, { mongo } from "mongoose";
 
 const variantSchema = new mongoose.Schema({
+    images: [{
+        type: String,
+    }],
     color: String,
     ram: String,
     rom: String,
@@ -29,6 +32,10 @@ const productSchema = new mongoose.Schema({
         trim: true
     },
     variants: [variantSchema],
+    defaultVariant: {
+        type: Number,
+        default: 0
+    },
     ratings: {
         average: {
             type: Number,
@@ -41,10 +48,6 @@ const productSchema = new mongoose.Schema({
             default: 0
         }
     },
-    images: [{
-        type: String,
-        required: true,
-    }],
     isActive: {
         type: Boolean,
         default: true
