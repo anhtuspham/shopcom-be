@@ -171,6 +171,17 @@ const updateProduct = asyncHandler(async (req, res) => {
         console.error(error);
         return res.status(500).json({message: "Có lỗi xảy ra khi xóa sản phẩm"})};
   });
+
+  const productDetail = asyncHandler(async (req, res) => {
+    const { id } = req.params;
+    const product = await Product.findById(id);
+
+    if (!product) {
+      return res.status(404).json({ message: "Sản phẩm không tồn tại" });
+    }
+
+    return res.status(200).json({data: product});
+  });
   
 
-export { createProduct, updateProduct, deleteProduct };
+export { createProduct, updateProduct, deleteProduct, productDetail };
