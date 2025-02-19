@@ -182,6 +182,44 @@ const updateProduct = asyncHandler(async (req, res) => {
 
     return res.status(200).json({data: product});
   });
+
+  const rateProduct = asyncHandler(async (req, res) => {
+    const { id } = req.params;
+    const { rating } = req.body;
+
+    if (!rating || rating < 1 || rating > 5) {
+        return res.status(400).json({ message: "Đánh giá không hợp lệ" });
+    }
+
+    const product = await Product.findById(id);
+    if (!product) {
+        return res.status(404).json({ message: "Sản phẩm không tồn tại" });
+    }
+
+    let { average, count } = product.ratings; 
+
+    const newCount = count + 1;
+    const newAverage = (average * count + parseInt(rating, 10)) / newCount;
+    console.log((average * count + rating));
+
+    if (newAverage > 5) {
+        return res.status(400).json({ message: "Lỗi tính toán đánh giá, vui lòng thử lại" });
+    }
+
+    product.ratings = { 
+        average: newAverage, 
+        count: newCount 
+    };
+
+    try {
+        await product.save();
+        return res.status(200).json({ message: "Đánh giá thành công", data: product });
+    } catch (error) {
+        console.error("Lỗi khi lưu sản phẩm:", error);
+        return res.status(500).json({ message: "Có lỗi trong khi đánh giá sản phẩm" });
+    }
+});
+
   
 
-export { createProduct, updateProduct, deleteProduct, productDetail };
+export { createProduct, updateProduct, deleteProduct, productDetail, rateProduct };
