@@ -1,7 +1,7 @@
 import express from 'express';
 
 import {protect} from '../middleware/auth-middleware.js';
-import {createProduct, updateProduct, deleteProduct, productDetail, rateProduct} from '../controllers/product-controller.js';
+import {createProduct, updateProduct, deleteProduct, productDetail, reviewProduct, getProductReview, deleteReview} from '../controllers/product-controller.js';
 import upload from '../middleware/multer.js';
 
 const router = express.Router();
@@ -13,6 +13,10 @@ router.delete('/delete/:id', protect, deleteProduct);
 
 // productDetail
 router.get('/:id', protect, productDetail);
-router.post('/rate/:id', protect, rateProduct);
+
+// reviewProduct
+router.post('/create-review/:productId', protect, reviewProduct);
+router.post('/get-review/:productId', protect, getProductReview);
+router.post('/delete-review/:reviewId', protect, deleteReview);
 
 export default router;
