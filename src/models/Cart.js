@@ -12,7 +12,6 @@ const cartSchema = new mongoose.Schema({
     isCheckoutCompleted: { type: Boolean, default: false },
     createdAt: { type: Date, default: Date.now },
     updatedAt: { type: Date },
-  
 });
 
 const Cart = mongoose.model("Cart", cartSchema);
