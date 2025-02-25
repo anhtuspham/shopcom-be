@@ -203,9 +203,7 @@ const reviewProduct = asyncHandler(async (req, res) => {
   const { productId } = req.params;
   const { rating, comment } = req.body;
   const userId = req.user._id;
-  console.log('userId', req.body);
   
-
   if(!userId) {
     return res.status(401).json({ message: "Bạn cần đăng nhập để đánh giá sản phẩm" });
   }
