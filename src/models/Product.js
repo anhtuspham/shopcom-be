@@ -8,7 +8,7 @@ const variantSchema = new mongoose.Schema({
     ram: String,
     rom: String,
     price: {type: String, required: true},
-    stock: {type: Number, required: true, min: 0, max: 100, default: 0},
+    quantity: {type: Number, required: true, min: 0, max: 100, default: 0},
 })
 
 const productSchema = new mongoose.Schema({

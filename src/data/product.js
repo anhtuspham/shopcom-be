@@ -15,7 +15,7 @@ const generateVariants = (category) => {
     const variant = {
       images: [faker.image.url(), faker.image.url()],
       price: faker.number.int({ min: 100, max: 10000 }),
-      stock: faker.number.int({ min: 0, max: 100 }),
+      quantity: faker.number.int({ min: 0, max: 100 }),
     };
 
     if (
