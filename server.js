@@ -7,6 +7,7 @@ import userRouter from "./src/routes/user-routes.js";
 import productRouter from "./src/routes/product-routes.js";
 import productsRouter from "./src/routes/products-routes.js";
 import cartRouter from "./src/routes/cart-routes.js";
+import orderRouter from "./src/routes/order-routes.js";
 
 dotenv.config();
 
@@ -24,6 +25,7 @@ app.use("/api/users", userRouter);
 app.use("/api/product", productRouter);
 app.use("/api/products", productsRouter);
 app.use("/api/cart", cartRouter);
+app.use("/api/orders", orderRouter);
 
 app.use((err, req, res, next) => {
   console.error("Error:", err);
