@@ -1,20 +1,21 @@
 import express from "express";
 import {
-  authUser,
+  login,
   registerUser,
-  getUserProfile,
+  getProfileUser,
   forgotPassword,
   verifyOtpEmail,
   verifyOtpPassword,
   resendOtp,
   resetPassword,
   updatePassword,
-} from "../controllers/user-controller.js";
-import { protect } from "../middleware/auth-middleware.js";
+  updateUserProfile
+} from "../../controllers/user-controller.js";
+import { protect } from "../../middleware/auth-middleware.js";
 
 const router = express.Router();
 
-router.post("/login", authUser);
+router.post("/login", login);
 
 router.post("/register", registerUser);
 router.post("/verify-otp", verifyOtpEmail);
@@ -25,6 +26,9 @@ router.post("/verify-otp-password", verifyOtpPassword);
 router.post("/reset-password", resetPassword);
 router.post("/update-password", protect, updatePassword);
 
-router.get("/profile", protect, getUserProfile);
+router.get("/profile", protect, getProfileUser);
+
+// update
+router.put("/profile", protect, updateUserProfile);
 
 export default router;

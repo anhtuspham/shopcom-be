@@ -1,6 +1,6 @@
 import express from "express";
 
-import { protect } from "../middleware/auth-middleware.js";
+import { protect } from "../../middleware/auth-middleware.js";
 import {
   createProduct,
   updateProduct,
@@ -9,8 +9,8 @@ import {
   reviewProduct,
   getProductReview,
   deleteReview,
-} from "../controllers/product-controller.js";
-import upload from "../middleware/multer.js";
+} from "../../controllers/product-controller.js";
+import upload from "../../middleware/multer.js";
 
 const router = express.Router();
 

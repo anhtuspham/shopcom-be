@@ -9,15 +9,12 @@ import jwt from "jsonwebtoken";
 import Otp from "../models/Otp.js";
 import User from "../models/User.js";
 
-// @desc    Auth user & get token
-// @route   POST /api/users/login
-// @access  Public
-const authUser = asyncHandler(async (req, res) => {
+const login = asyncHandler(async (req, res) => {
   const { email, password } = req.body;
 
   const user = await User.findOne({ email });
 
-  if(!user) {
+  if (!user) {
     res.status(404).json({ message: "Người dùng không tồn tại" });
     throw new Error("Người dùng không tồn tại");
   }
@@ -36,9 +33,6 @@ const authUser = asyncHandler(async (req, res) => {
   }
 });
 
-// @desc    Register a new user
-// @route   POST /api/users
-// @access  Public
 const registerUser = asyncHandler(async (req, res) => {
   const { name, email, password } = req.body;
 
@@ -158,34 +152,34 @@ const verifyOtpPassword = async (req, res) => {
 
   await User.findByIdAndUpdate(userId, { isForgotPassword: false });
   await Otp.findByIdAndDelete(otpRecord._id);
-  res
-    .status(200)
-    .json({
-      message: "OTP đã xác thực. Hãy đặt lại mật khẩu của bạn",
-      email: email,
-      token: generateResetPasswordToken(userId),
-    });
+  res.status(200).json({
+    message: "OTP đã xác thực. Hãy đặt lại mật khẩu của bạn",
+    email: email,
+    token: generateResetPasswordToken(userId),
+  });
 };
 
 const resetPassword = asyncHandler(async (req, res) => {
-  const {token, newPassword, confirmNewPassword} = req.body;
+  const { token, newPassword, confirmNewPassword } = req.body;
 
-  if(newPassword !== confirmNewPassword) {
-    return res.status(400).json({ message: "Mật khẩu và xác nhận mật khẩu không giống nhau." });
+  if (newPassword !== confirmNewPassword) {
+    return res
+      .status(400)
+      .json({ message: "Mật khẩu và xác nhận mật khẩu không giống nhau." });
   }
 
   const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-  if(decoded.purpose !== "resetPassword") {
+  if (decoded.purpose !== "resetPassword") {
     return res.status(400).json({ message: "Token không hợp lệ" });
   }
 
   const user = await User.findById(decoded.id);
-  if(!user) {
+  if (!user) {
     return res.status(404).json({ message: "Người dùng không tồn tại" });
-  };
+  }
   user.password = newPassword;
-  user.markModified('password');
+  user.markModified("password");
   await user.save();
 
   res.status(200).json({ message: "Mật khẩu đã được cập nhật thành công" });
@@ -194,34 +188,35 @@ const resetPassword = asyncHandler(async (req, res) => {
 const updatePassword = asyncHandler(async (req, res) => {
   const { email, oldPassword, password, confirmPassword } = req.body;
 
-  if(!email || !oldPassword || !password || !confirmPassword) {
+  if (!email || !oldPassword || !password || !confirmPassword) {
     return res.status(400).json({ message: "Thiếu dữ liệu" });
   }
 
   const user = await User.findOne({ email: email });
-  if(!user) {
+  if (!user) {
     return res.status(404).json({ message: "Người dùng không tồn tại" });
   }
 
   if (!password || !confirmPassword || password !== confirmPassword) {
-    return res.status(400).json({ message: "Mật khẩu và xác nhận mật khẩu không giống nhau." });
+    return res
+      .status(400)
+      .json({ message: "Mật khẩu và xác nhận mật khẩu không giống nhau." });
   }
 
-  if(await user.matchPassword(oldPassword)) {
+  if (await user.matchPassword(oldPassword)) {
     user.password = password;
-    user.markModified('password');
+    user.markModified("password");
     await user.save();
-    
-    return res.status(200).json({ message: "Mật khẩu cập nhật thành công", user: user});
+
+    return res
+      .status(200)
+      .json({ message: "Mật khẩu cập nhật thành công", user: user });
   } else {
     return res.status(400).json({ message: "Mật khẩu không chính xác" });
   }
 });
 
-// @desc    Get user profile
-// @route   GET /api/users/profile
-// @access  Private
-const getUserProfile = asyncHandler(async (req, res) => {
+const getProfileUser = asyncHandler(async (req, res) => {
   const user = await User.findById(req.user._id);
 
   if (user) {
@@ -237,14 +232,72 @@ const getUserProfile = asyncHandler(async (req, res) => {
   }
 });
 
+const getAllUsers = asyncHandler(async (req, res) => {
+  const users = await User.find().select("-password");
+  res.status(200).json(users);
+});
+
+const updateUserProfile = asyncHandler(async (req, res) => {
+  const user = await User.findById(req.user._id);
+
+  if (!user) {
+    res.status(404);
+    throw new Error("Không tìm thấy người dùng");
+  }
+
+  user.name = req.body.name || user.name;
+  user.email = req.body.email || user.email;
+  if (req.body.password) {
+    user.password = req.body.password;
+  }
+
+  const updatedUser = await user.save();
+
+  res.status(200).json({
+    _id: updatedUser._id,
+    name: updatedUser.name,
+    email: updatedUser.email,
+  });
+});
+
+const deleteUser = asyncHandler(async (req, res) => {
+  const user = await User.findById(req.params.id);
+
+  if (!user) {
+    res.status(404);
+    throw new Error("Không tìm thấy người dùng");
+  }
+
+  await user.deleteOne();
+  res.status(200).json({ message: "Người dùng đã bị xóa" });
+});
+
+const updateUserRole = asyncHandler(async (req, res) => {
+  const user = await User.findById(req.params.id);
+
+  if (!user) {
+    res.status(404);
+    throw new Error("Không tìm thấy người dùng");
+  }
+
+  user.isAdmin = req.body.isAdmin;
+  await user.save();
+
+  res.status(200).json({ message: "Cập nhật vai trò người dùng thành công" });
+});
+
 export {
-  authUser,
+  login,
   registerUser,
-  getUserProfile,
+  getProfileUser,
   forgotPassword,
   verifyOtpEmail,
   verifyOtpPassword,
   resendOtp,
   updatePassword,
-  resetPassword
+  resetPassword,
+  getAllUsers,
+  updateUserProfile,
+  deleteUser,
+  updateUserRole
 };
