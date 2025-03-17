@@ -20,7 +20,7 @@ const upload = multer();
 // Middleware configuration
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(upload.none());
+// app.use(upload.none());
 
 app.use("/api/admin", adminRouter);
 app.use("/api/users", userRouter);
