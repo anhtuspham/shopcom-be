@@ -15,6 +15,12 @@ import { protect } from "../../middleware/auth-middleware.js";
 
 const router = express.Router();
 
+/**
+ * @swagger
+ * tags:
+ *   - name: User
+ *     description: Quản lý người dùng
+ */
 router.post("/login", login);
 
 router.post("/register", registerUser);

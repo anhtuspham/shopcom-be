@@ -13,6 +13,12 @@ import {
 
 const router = express.Router();
 
+/**
+ * @swagger
+ * tags:
+ *   - name: Order
+ *     description: Quản lý đơn hàng
+ */
 router.post("/", protect, createOrder);
 router.post("/:orderId/pay", protect, confirmPayment);
 router.post("/create-payment-intent", protect, createPaymentIntent);

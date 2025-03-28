@@ -1,3 +1,4 @@
+
 import express from "express";
 import dotenv from "dotenv";
 import connectDB from "./src/config/db.js";
@@ -9,6 +10,12 @@ import productsRouter from "./src/routes/user/products-routes.js";
 import cartRouter from "./src/routes/user/cart-routes.js";
 import orderRouter from "./src/routes/user/order-routes.js";
 import adminRouter from "./src/routes/admin/admin-routes.js";
+import { getIPAddress } from "./src/utils/ipConfig.js";
+// import { setupSwagger } from "./src/utils/swaggerConfig.js";
+import swaggerUi from 'swagger-ui-express';
+import swaggerDocument from './src/utils/swagger-output.json' assert { type: "json" };
+
+const IP = getIPAddress();
 
 dotenv.config();
 
@@ -31,14 +38,21 @@ app.use("/api/order", orderRouter);
 
 app.use((err, req, res, next) => {
   console.error("Error:", err);
+  if (res.headersSent) {
+    return next(err);
+  }
   res.status(500).json({ message: "Something went wrong" });
 });
+
+app.use("/swagger/index.html", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 // Routes
 app.get("/", (req, res) => {
   res.send("API is running...");
 });
 
+// setupSwagger(app);
+
 const PORT = process.env.PORT || 5000;
 
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+app.listen(PORT, () => console.log(`Server running on port http://localhost:${PORT} or http://${IP}:${PORT}`));

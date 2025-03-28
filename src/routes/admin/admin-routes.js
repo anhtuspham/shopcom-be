@@ -5,6 +5,12 @@ import { getAllUsers, deleteUser, updateUserRole } from "../../controllers/user-
 
 const router = express.Router();
 
+/**
+ * @swagger
+ * tags:
+ *   - name: Admin
+ *     description: Quyền admin
+ */
 // user
 router.get("/user/get-all-user", protect, admin, getAllUsers);
 router.delete("/user/:id", protect, admin, deleteUser);
