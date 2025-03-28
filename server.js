@@ -3,6 +3,7 @@ import express from "express";
 import dotenv from "dotenv";
 import connectDB from "./src/config/db.js";
 import multer from "multer";
+import fs from 'fs';
 
 import userRouter from "./src/routes/user/user-routes.js";
 import productRouter from "./src/routes/user/product-routes.js";
@@ -13,7 +14,9 @@ import adminRouter from "./src/routes/admin/admin-routes.js";
 import { getIPAddress } from "./src/utils/ipConfig.js";
 // import { setupSwagger } from "./src/utils/swaggerConfig.js";
 import swaggerUi from 'swagger-ui-express';
-import swaggerDocument from './src/utils/swagger-output.json' assert { type: "json" };
+// import swaggerDocument from './src/utils/swagger-output.json';
+const swaggerDocument = JSON.parse(fs.readFileSync('./src/utils/swagger-output.json', 'utf-8'));
+
 
 const IP = getIPAddress();
 
