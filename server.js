@@ -1,6 +1,8 @@
 
 import express from "express";
 import dotenv from "dotenv";
+dotenv.config();
+
 import connectDB from "./src/config/db.js";
 import multer from "multer";
 import fs from 'fs';
@@ -17,10 +19,8 @@ import swaggerUi from 'swagger-ui-express';
 // import swaggerDocument from './src/utils/swagger-output.json';
 const swaggerDocument = JSON.parse(fs.readFileSync('./src/utils/swagger-output.json', 'utf-8'));
 
-
 const IP = getIPAddress();
 
-dotenv.config();
 
 connectDB();
 
