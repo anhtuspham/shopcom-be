@@ -39,12 +39,15 @@ const generateVariants = (category) => {
 
 const generateRandomProduct = () => {
   const category = faker.helpers.arrayElement(categories);
+  const variants = generateVariants(category);
+
   return {
     name: faker.commerce.productName(),
     description: faker.commerce.productDescription(),
     category,
     brand: faker.helpers.arrayElement(brands),
-    variants: generateVariants(category),
+    variants,
+    defaultVariant: variants[0], 
     ratings: {
       average: faker.number.float({ min: 1, max: 5, precision: 0.1 }),
       count: faker.number.int({ min: 1, max: 500 }),

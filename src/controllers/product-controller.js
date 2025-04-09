@@ -196,7 +196,7 @@ const productDetail = asyncHandler(async (req, res) => {
     return res.status(404).json({ message: "Sản phẩm không tồn tại" });
   }
 
-  return res.status(200).json({ data: product });
+  return res.status(200).json(product);
 });
 
 const reviewProduct = asyncHandler(async (req, res) => {

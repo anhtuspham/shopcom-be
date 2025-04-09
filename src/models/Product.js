@@ -33,8 +33,8 @@ const productSchema = new mongoose.Schema({
     },
     variants: [variantSchema],
     defaultVariant: {
-        type: Number,
-        default: 0
+        type: variantSchema,
+        default: undefined,
     },
     ratings: { 
         average: {
@@ -54,6 +54,13 @@ const productSchema = new mongoose.Schema({
     }
 }, {
     timestamps: true
+});
+
+productSchema.pre('save', function (next) {
+    if (this.isModified('variants')) {
+        this.defaultVariant = this.variants[0];
+    }
+    next();
 });
 
 const Product = mongoose.model('Product', productSchema);
