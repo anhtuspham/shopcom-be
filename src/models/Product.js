@@ -7,7 +7,7 @@ const variantSchema = new mongoose.Schema({
     color: String,
     ram: String,
     rom: String,
-    price: {type: String, required: true},
+    price: {type: Number, required: true},
     quantity: {type: Number, required: true, min: 0, max: 100, default: 0},
 })
 
