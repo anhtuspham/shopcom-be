@@ -5,10 +5,11 @@ import Product from "../models/Product.js";
 // add product to cart
 const addProductToCart = asyncHandler(async (req, res) => {
   const { productId, variantIndex, quantity } = req.body;
-
+  
   const userId = req.user._id;
 
   const product = await Product.findById(productId);
+
 
   if (!product) {
     return res.status(404).json({ message: "Sản phẩm không tồn tại" });
@@ -141,7 +142,7 @@ const getUserCart = asyncHandler(async (req, res) => {
     return res.status(404).json({ message: "Giỏ hàng trống" });
   }
 
-  res.status(200).json({ cart });
+  res.status(200).json(cart);
 });
 
 
