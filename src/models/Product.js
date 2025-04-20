@@ -1,4 +1,5 @@
 import mongoose, { mongo } from "mongoose";
+import Variant from "../models/Variant.js"
 
 const variantSchema = new mongoose.Schema({
     images: [{
@@ -31,9 +32,9 @@ const productSchema = new mongoose.Schema({
         required: true,
         trim: true
     },
-    variants: [variantSchema],
+    variants: [Variant.schema],
     defaultVariant: {
-        type: variantSchema,
+        type: Variant.schema,
         default: undefined,
     },
     ratings: { 
