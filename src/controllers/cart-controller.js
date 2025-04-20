@@ -5,11 +5,10 @@ import Product from "../models/Product.js";
 // add product to cart
 const addProductToCart = asyncHandler(async (req, res) => {
   const { productId, variantIndex, quantity } = req.body;
-  
+
   const userId = req.user._id;
 
   const product = await Product.findById(productId);
-
 
   if (!product) {
     return res.status(404).json({ message: "Sản phẩm không tồn tại" });
@@ -29,24 +28,40 @@ const addProductToCart = asyncHandler(async (req, res) => {
 
   let cart = await Cart.findOne({ userId });
   if (!cart) {
-    if(quantity < 0){
+    if (quantity < 0) {
       return res.status(400).json({
         message: "Số lượng sản phẩm trong giỏ hàng không hợp lệ",
       });
     }
     cart = new Cart({
       userId,
-      products: [{ productId, variantIndex, variantProduct: variant, price: variant.price, quantity }],
+      products: [
+        {
+          productId,
+          productName: product.name,
+          productDescription: product.description,
+          productBrand: product.brand,
+          productCategory: product.category,
+          variantIndex,
+          variantProduct: variant,
+          price: variant.price,
+          quantity,
+        },
+      ],
       totalPrice: variant.price * quantity,
     });
   } else if (cart.products.length === 0) {
-    if(quantity < 0){
+    if (quantity < 0) {
       return res.status(400).json({
         message: "Số lượng sản phẩm trong giỏ hàng không hợp lệ",
       });
     }
     cart.products.push({
       productId,
+      productName: product.name,
+      productDescription: product.description,
+      productBrand: product.brand,
+      productCategory: product.category,
       variantIndex,
       variantProduct: variant,
       price: variant.price,
@@ -79,13 +94,16 @@ const addProductToCart = asyncHandler(async (req, res) => {
       // san pham chua co trong gio hang
       cart.products.push({
         productId,
+        productName: product.name,
+        productDescription: product.description,
+        productBrand: product.brand,
+        productCategory: product.category,
         variantIndex,
         variantProduct: variant,
         price: variant.price,
         quantity,
       });
     }
-
   }
 
   cart.totalPrice = cart.products.reduce(
@@ -115,7 +133,9 @@ const removeProductFromCart = asyncHandler(async (req, res) => {
   );
 
   if (cart.products.length === initialLength) {
-    return res.status(404).json({ message: "Sản phẩm không có trong giỏ hàng" });
+    return res
+      .status(404)
+      .json({ message: "Sản phẩm không có trong giỏ hàng" });
   }
 
   cart.totalPrice = cart.products.reduce(
@@ -125,24 +145,27 @@ const removeProductFromCart = asyncHandler(async (req, res) => {
 
   if (cart.products.length === 0) {
     await Cart.findOneAndDelete({ userId });
-    return res.status(200).json({ message: "Giỏ hàng đã bị xóa vì không còn sản phẩm" });
+    return res
+      .status(200)
+      .json({ message: "Giỏ hàng đã bị xóa vì không còn sản phẩm" });
   }
 
   await cart.save();
-  res.status(200).json({ message: "Xóa sản phẩm khỏi giỏ hàng thành công", cart });
+  res
+    .status(200)
+    .json({ message: "Xóa sản phẩm khỏi giỏ hàng thành công", cart });
 });
 
 const getUserCart = asyncHandler(async (req, res) => {
   const userId = req.user._id;
 
   const cart = await Cart.findOne({ userId });
-  
+
   if (!cart) {
     return res.status(404).json({ message: "Giỏ hàng trống" });
   }
 
   res.status(200).json(cart);
 });
-
 
 export { addProductToCart, removeProductFromCart, getUserCart };
