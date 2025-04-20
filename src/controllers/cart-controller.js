@@ -36,7 +36,7 @@ const addProductToCart = asyncHandler(async (req, res) => {
     }
     cart = new Cart({
       userId,
-      products: [{ productId, variantIndex, price: variant.price, quantity }],
+      products: [{ productId, variantIndex, variantProduct: variant, price: variant.price, quantity }],
       totalPrice: variant.price * quantity,
     });
   } else if (cart.products.length === 0) {
@@ -48,6 +48,7 @@ const addProductToCart = asyncHandler(async (req, res) => {
     cart.products.push({
       productId,
       variantIndex,
+      variantProduct: variant,
       price: variant.price,
       quantity,
     });
@@ -79,6 +80,7 @@ const addProductToCart = asyncHandler(async (req, res) => {
       cart.products.push({
         productId,
         variantIndex,
+        variantProduct: variant,
         price: variant.price,
         quantity,
       });
@@ -133,11 +135,8 @@ const removeProductFromCart = asyncHandler(async (req, res) => {
 const getUserCart = asyncHandler(async (req, res) => {
   const userId = req.user._id;
 
-  const cart = await Cart.findOne({ userId }).populate({
-    path: "products.productId",
-    select: "name brand category",
-  });
-
+  const cart = await Cart.findOne({ userId });
+  
   if (!cart) {
     return res.status(404).json({ message: "Giỏ hàng trống" });
   }

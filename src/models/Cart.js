@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import Variant from "../models/Variant.js";
 
 const cartSchema = new mongoose.Schema({
     userId: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
@@ -6,6 +7,7 @@ const cartSchema = new mongoose.Schema({
       {
         productId: { type: mongoose.Schema.Types.ObjectId, ref: "Product", required: true },
         variantIndex: {type: Number, default: 0},
+        variantProduct: [Variant.schema],
         price: { type: Number, required: true},
         quantity: { type: Number, required: true },
       },
