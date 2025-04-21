@@ -8,7 +8,6 @@ import Cart from "../models/Cart.js";
 import Order from "../models/Order.js";
 import Product from "../models/Product.js";
 
-
 const createOrder = asyncHandler(async (req, res) => {
   const userId = req.user._id;
   const { paymentMethod } = req.body;
@@ -20,22 +19,19 @@ const createOrder = asyncHandler(async (req, res) => {
     return res.status(400).json({ message: "Giỏ hàng trống" });
   }
 
-  // Kiểm tra tồn kho trước khi đặt hàng
+  // Kiểm tra tồn kho + cập nhật số lượng tồn
   for (const item of cart.products) {
-    const product = await Product.findById(item.productId);
+    const product = item.productId;
+
     if (
       !product ||
       product.variants[item.variantIndex].quantity < item.quantity
     ) {
-      return res
-        .status(400)
-        .json({ message: `Sản phẩm ${product?.name} không đủ hàng` });
+      return res.status(400).json({
+        message: `Sản phẩm ${product?.name} không đủ hàng trong kho`,
+      });
     }
-  }
 
-  // Trừ số lượng sản phẩm trong kho
-  for (const item of cart.products) {
-    const product = await Product.findById(item.productId);
     product.variants[item.variantIndex].quantity -= item.quantity;
     await product.save();
   }
@@ -44,7 +40,13 @@ const createOrder = asyncHandler(async (req, res) => {
   const order = new Order({
     userId,
     products: cart.products.map((item) => ({
-      productId: item.productId,
+      productId: item.productId._id,
+      productName: item.productName,
+      productDescription: item.productDescription,
+      productCategory: item.productCategory,
+      productBrand: item.productBrand,
+      variantIndex: item.variantIndex,
+      variantProduct: item.variantProduct[0],
       quantity: item.quantity,
       price: item.price,
     })),
@@ -57,7 +59,7 @@ const createOrder = asyncHandler(async (req, res) => {
   // Xóa giỏ hàng sau khi đặt hàng thành công
   await Cart.findOneAndDelete({ userId });
 
-  res.status(201).json({ message: "Tạo đơn hàng thành công", order });
+  res.status(201).json(order);
 });
 
 const confirmPayment = asyncHandler(async (req, res) => {
@@ -106,10 +108,7 @@ const updateOrderStatus = asyncHandler(async (req, res) => {
 const getUserOrders = asyncHandler(async (req, res) => {
   const userId = req.user._id;
 
-  const orders = await Order.find({ userId }).populate(
-    "products.productId",
-    "name brand"
-  );
+  const orders = await Order.find({ userId });
 
   res.status(200).json(orders);
 });
