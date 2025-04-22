@@ -162,7 +162,7 @@ const getUserCart = asyncHandler(async (req, res) => {
   const cart = await Cart.findOne({ userId });
 
   if (!cart) {
-    return res.status(404).json({ message: "Giỏ hàng trống" });
+    return res.status(200).json({ message: "Giỏ hàng trống" });
   }
 
   res.status(200).json(cart);
