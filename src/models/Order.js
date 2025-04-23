@@ -31,6 +31,7 @@ const orderSchema = new mongoose.Schema({
     enum: ["COD", "Banking"],
     default: "COD",
   },
+  address: { type: String },
   createdAt: { type: Date, default: Date.now },
 });
 

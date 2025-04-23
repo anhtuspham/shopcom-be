@@ -6,6 +6,7 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 import asyncHandler from "express-async-handler";
 import Cart from "../models/Cart.js";
 import Order from "../models/Order.js";
+import User from "../models/User.js";
 import Product from "../models/Product.js";
 
 const createOrder = asyncHandler(async (req, res) => {
@@ -14,6 +15,7 @@ const createOrder = asyncHandler(async (req, res) => {
 
   // Lấy giỏ hàng của user
   const cart = await Cart.findOne({ userId }).populate("products.productId");
+  const user = await User.findById(userId).select("address");
 
   if (!cart || cart.products.length === 0) {
     return res.status(400).json({ message: "Giỏ hàng trống" });
@@ -50,6 +52,7 @@ const createOrder = asyncHandler(async (req, res) => {
       quantity: item.quantity,
       price: item.price,
     })),
+    address: user.address,
     totalAmount: cart.totalPrice,
     paymentMethod,
   });
