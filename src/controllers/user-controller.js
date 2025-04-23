@@ -250,6 +250,9 @@ const updateUserProfile = asyncHandler(async (req, res) => {
   if (req.body.password) {
     user.password = req.body.password;
   }
+  if (req.body.address) {
+    user.address = req.body.address;
+  }
 
   const updatedUser = await user.save();
 
@@ -257,6 +260,7 @@ const updateUserProfile = asyncHandler(async (req, res) => {
     _id: updatedUser._id,
     name: updatedUser.name,
     email: updatedUser.email,
+    address: updatedUser.address,
   });
 });
 
