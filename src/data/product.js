@@ -10,7 +10,7 @@ const categories = ["Laptop", "Smartphone", "Tablet", "Headphone"];
 const brands = ["Apple", "Samsung", "Dell", "HP", "Sony"];
 
 const generateVariants = (category) => {
-  const numberVariants = faker.number.int({ min: 1, max: 4 });
+  const numberVariants = faker.number.int({ min: 1, max: 3 });
   return Array.from({ length: numberVariants }, () => {
     const variant = {
       images: [faker.image.url(), faker.image.url()],
@@ -61,10 +61,10 @@ const seedProducts = async () => {
     await Product.deleteMany();
     console.log("🗑 Dữ liệu cũ đã bị xóa");
 
-    const products = Array.from({ length: 50 }, generateRandomProduct);
+    const products = Array.from({ length: 4 }, generateRandomProduct);
     await Product.insertMany(products);
 
-    console.log("✅ 50 sản phẩm đã được thêm thành công!");
+    console.log("✅ 4 sản phẩm đã được thêm thành công!");
     process.exit();
   } catch (error) {
     console.error("❌ Lỗi khi thêm dữ liệu:", error);

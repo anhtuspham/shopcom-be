@@ -162,7 +162,7 @@ const updateProduct = asyncHandler(async (req, res) => {
 
     return res
       .status(200)
-      .json({ message: "Sản phẩm đã được cập nhật", data: updatedProduct });
+      .json(updatedProduct);
   } catch (error) {
     console.error(error);
     return res
@@ -209,6 +209,8 @@ const reviewProduct = asyncHandler(async (req, res) => {
   }
   
   if (!rating || rating < 1 || rating > 5) {
+    console.log("Rating không hợp lệ:", rating);
+    
     return res.status(400).json({ message: "Đánh giá không hợp lệ" });
   }
 
@@ -241,7 +243,7 @@ const reviewProduct = asyncHandler(async (req, res) => {
   await product.save();
   return res
     .status(201)
-    .json({ message: "Đánh giá đã được thêm", data: newReview });
+    .json(newReview);
 });
 
 const getProductReview = asyncHandler(async (req, res) => {
@@ -254,7 +256,7 @@ const getProductReview = asyncHandler(async (req, res) => {
 
   const review = await Review.find({productId}).populate('userId', "name");
 
-  res.status(200).json({data: review});
+  res.status(200).json(review);
 })
 
 const deleteReview = asyncHandler(async (req, res) => {
