@@ -12,6 +12,7 @@ import productRouter from "./src/routes/user/product-routes.js";
 import productsRouter from "./src/routes/user/products-routes.js";
 import cartRouter from "./src/routes/user/cart-routes.js";
 import orderRouter from "./src/routes/user/order-routes.js";
+import favoriteRouter from "./src/routes/user/favorite-routes.js";
 import adminRouter from "./src/routes/admin/admin-routes.js";
 import { getIPAddress } from "./src/utils/ipConfig.js";
 // import { setupSwagger } from "./src/utils/swaggerConfig.js";
@@ -36,6 +37,7 @@ app.use("/api/admin", adminRouter);
 app.use("/api/users", userRouter);
 app.use("/api/product", productRouter);
 app.use("/api/products", productsRouter);
+app.use("/api/favorite", favoriteRouter)
 app.use("/api/cart", cartRouter);
 app.use("/api/order", orderRouter);
 
