@@ -9,6 +9,9 @@ import {
   reviewProduct,
   getProductReview,
   deleteReview,
+  addFavorite,
+  removeFavorite,
+  getFavorites
 } from "../../controllers/product-controller.js";
 import upload from "../../middleware/multer.js";
 
@@ -23,6 +26,11 @@ const router = express.Router();
 router.post("/create", protect, upload.any(), createProduct);
 router.put("/update/:id", protect, upload.any(), updateProduct);
 router.delete("/delete/:id", protect, deleteProduct);
+
+// favoriteProduct
+router.post("/favorite/:productId", protect, addFavorite);
+router.delete("/favorite/:productId", protect, removeFavorite);
+router.get("/get-favorite-products", protect, getFavorites);
 
 // productDetail
 router.get("/:id", protect, productDetail);

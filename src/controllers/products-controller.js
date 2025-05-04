@@ -37,7 +37,7 @@ const getProducts = asyncHandler(async (req, res) => {
         break;
     }
   
-    const skip = (page - 1) * limit;
+    const skip = (page - 1) * limit;   
   
     try {
       const products = await Product.find(query)

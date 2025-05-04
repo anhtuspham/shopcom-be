@@ -4,6 +4,7 @@ import cloudinary from "../utils/cloudinary.js";
 import fs from "fs";
 import { promisify } from "util";
 import Review from "../models/Review.js";
+import Favorite from "../models/Favorite.js";
 
 const unlinkAsync = promisify(fs.unlink);
 
@@ -286,6 +287,43 @@ const deleteReview = asyncHandler(async (req, res) => {
   res.status(200).json({ message: "Review đã được xóa" });
 });
 
+const addFavorite = asyncHandler(async (req, res) => {
+  const userId = req.user._id;
+  const productId = req.params.productId;
+
+  let favorite = await Favorite.findOne({ userId });
+
+  if (!favorite) {
+    favorite = new Favorite({ userId, productIds: [productId] });
+  } else if (!favorite.productIds.includes(productId)) {
+    favorite.productIds.push(productId);
+  }
+
+  await favorite.save();
+  res.status(200).json({ message: "Đã thêm vào danh sách yêu thích" });
+});
+
+const removeFavorite = asyncHandler(async (req, res) => {
+  const userId = req.user._id;
+  const productId = req.params.productId;
+
+  await Favorite.findOneAndUpdate(
+    { userId },
+    { $pull: { productIds: productId } }
+  );
+
+  res.status(200).json({ message: "Đã xóa khỏi danh sách yêu thích" });
+});
+
+const getFavorites = asyncHandler(async (req, res) => {
+  console.log("Fetching favorites for user:", req.user._id);
+  
+  const userId = req.user._id;
+  const favorite = await Favorite.findOne({ userId }).populate("productIds");
+
+  res.status(200).json(favorite?.productIds || []);
+});
+
 export {
   createProduct,
   updateProduct,
@@ -294,4 +332,7 @@ export {
   reviewProduct,
   getProductReview,
   deleteReview,
+  addFavorite,
+  removeFavorite,
+  getFavorites,
 };
