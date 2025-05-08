@@ -10,8 +10,8 @@ import {
 const router = express.Router();
 
 // favoriteProduct
-router.post("/:productId", protect, addFavorite);
-router.delete("/:productId", protect, removeFavorite);
+router.post("/add-favorite", protect, addFavorite);
+router.delete("/remove-favorite", protect, removeFavorite);
 router.get("/get-favorite-products", protect, getFavorites);
 
 export default router;

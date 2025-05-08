@@ -20,6 +20,9 @@ const orderSchema = new mongoose.Schema({
       price: { type: Number, required: true },
     },
   ],
+  discountAmount: {type: Number, default: 0},
+  finalAmount: {type: Number},
+  coupon: { type: mongoose.Schema.Types.ObjectId, ref: "Coupon", default: null },
   totalAmount: { type: Number, required: true },
   status: {
     type: String,

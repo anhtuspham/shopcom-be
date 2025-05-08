@@ -14,6 +14,7 @@ import {
   getFavorites
 } from "../../controllers/product-controller.js";
 import upload from "../../middleware/multer.js";
+import { applyCoupon } from "../../controllers/coupon-controller.js";
 
 const router = express.Router();
 
@@ -34,5 +35,8 @@ router.get("/:id", protect, productDetail);
 router.post("/create-review/:productId", protect, reviewProduct);
 router.post("/get-review/:productId", protect, getProductReview);
 router.delete("/delete-review/:reviewId", protect, deleteReview);
+
+// coupon
+router.post("/apply-coupon", protect, applyCoupon);
 
 export default router;

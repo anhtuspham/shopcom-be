@@ -289,7 +289,7 @@ const deleteReview = asyncHandler(async (req, res) => {
 
 const addFavorite = asyncHandler(async (req, res) => {
   const userId = req.user._id;
-  const productId = req.params.productId;
+  const {productId} = req.body;
 
   let favorite = await Favorite.findOne({ userId });
 
@@ -305,7 +305,7 @@ const addFavorite = asyncHandler(async (req, res) => {
 
 const removeFavorite = asyncHandler(async (req, res) => {
   const userId = req.user._id;
-  const productId = req.params.productId;
+  const { productId } = req.body;
 
   await Favorite.findOneAndUpdate(
     { userId },

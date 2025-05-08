@@ -8,10 +8,11 @@ import Cart from "../models/Cart.js";
 import Order from "../models/Order.js";
 import User from "../models/User.js";
 import Product from "../models/Product.js";
+import Coupon from "../models/Coupon.js";
 
 const createOrder = asyncHandler(async (req, res) => {
   const userId = req.user._id;
-  const { paymentMethod } = req.body;
+  const { paymentMethod, couponCode } = req.body;
 
   // Lấy giỏ hàng của user
   const cart = await Cart.findOne({ userId }).populate("products.productId");
@@ -38,6 +39,53 @@ const createOrder = asyncHandler(async (req, res) => {
     await product.save();
   }
 
+  let discount = 0;
+  let finalAmount = cart.totalPrice;
+  let appliedCouponId = null;
+
+  // Nếu có mã giảm giá
+  if (couponCode) {
+    const coupon = await Coupon.findOne({
+      code: couponCode.toUpperCase(),
+      isActive: true,
+    });
+
+    if (!coupon) {
+      return res.status(400).json({ message: "Mã giảm giá không hợp lệ" });
+    }
+
+    if (new Date(coupon.expirationDate) < new Date()) {
+      return res.status(400).json({ message: "Mã đã hết hạn" });
+    }
+
+    if (coupon.usageLimit && coupon.usedCount >= coupon.usageLimit) {
+      return res.status(400).json({ message: "Mã đã được sử dụng hết" });
+    }
+
+    if (cart.totalPrice < coupon.minOrderValue) {
+      return res.status(400).json({
+        message: `Cần tối thiểu ${coupon.minOrderValue}đ để dùng mã`,
+      });
+    }
+
+    // Tính giảm giá
+    if (coupon.discountType === "percentage") {
+      discount = (cart.totalPrice * coupon.discountValue) / 100;
+      if (coupon.maxDiscountAmount && discount > coupon.maxDiscountAmount) {
+        discount = coupon.maxDiscountAmount;
+      }
+    } else if (coupon.discountType === "fixed") {
+      discount = coupon.discountValue;
+    }
+
+    finalAmount -= discount;
+    appliedCouponId = coupon._id;
+
+    // Cập nhật số lượt sử dụng
+    coupon.usedCount = (coupon.usedCount || 0) + 1;
+    await coupon.save();
+  }
+
   // Tạo đơn hàng
   const order = new Order({
     userId,
@@ -54,6 +102,9 @@ const createOrder = asyncHandler(async (req, res) => {
     })),
     address: user.address,
     totalAmount: cart.totalPrice,
+    discountAmount: discount,
+    finalAmount,
+    coupon: appliedCouponId,
     paymentMethod,
   });
 
