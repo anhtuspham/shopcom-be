@@ -32,9 +32,9 @@ router.delete("/delete/:id", protect, deleteProduct);
 router.get("/:id", protect, productDetail);
 
 // reviewProduct
-router.post("/create-review/:productId", protect, reviewProduct);
-router.post("/get-review/:productId", protect, getProductReview);
-router.delete("/delete-review/:reviewId", protect, deleteReview);
+router.post("/create-review", protect, reviewProduct);
+router.get("/get-review", protect, getProductReview);
+router.delete("/delete-review", protect, deleteReview);
 
 // coupon
 router.post("/apply-coupon", protect, applyCoupon);

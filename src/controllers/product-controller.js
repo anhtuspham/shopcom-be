@@ -201,8 +201,7 @@ const productDetail = asyncHandler(async (req, res) => {
 });
 
 const reviewProduct = asyncHandler(async (req, res) => {
-  const { productId } = req.params;
-  const { rating, comment } = req.body;
+  const { rating, comment, productId } = req.body;
   const userId = req.user._id;
   
   if(!userId) {
@@ -248,7 +247,7 @@ const reviewProduct = asyncHandler(async (req, res) => {
 });
 
 const getProductReview = asyncHandler(async (req, res) => {
-  const { productId } = req.params;
+  const { productId } = req.boy;
 
   const product = await Product.findById(productId);
   if (!product) {
@@ -261,7 +260,7 @@ const getProductReview = asyncHandler(async (req, res) => {
 })
 
 const deleteReview = asyncHandler(async (req, res) => {
-  const { reviewId } = req.params;
+  const { reviewId } = req.body;
   const userId = req.user._id;
 
   const review = await Review.findById(reviewId);
