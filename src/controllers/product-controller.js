@@ -247,7 +247,7 @@ const reviewProduct = asyncHandler(async (req, res) => {
 });
 
 const getProductReview = asyncHandler(async (req, res) => {
-  const { productId } = req.boy;
+  const { productId } = req.body;
 
   const product = await Product.findById(productId);
   if (!product) {

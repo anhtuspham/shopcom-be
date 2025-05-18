@@ -28,9 +28,6 @@ router.post("/create", protect, upload.any(), createProduct);
 router.put("/update/:id", protect, upload.any(), updateProduct);
 router.delete("/delete/:id", protect, deleteProduct);
 
-// productDetail
-router.get("/:id", protect, productDetail);
-
 // reviewProduct
 router.post("/create-review", protect, reviewProduct);
 router.get("/get-review", protect, getProductReview);
@@ -38,5 +35,8 @@ router.delete("/delete-review", protect, deleteReview);
 
 // coupon
 router.post("/apply-coupon", protect, applyCoupon);
+
+// productDetail
+router.get("/get/:id", protect, productDetail);
 
 export default router;
