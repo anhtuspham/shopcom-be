@@ -15,6 +15,8 @@ import orderRouter from "./src/routes/user/order-routes.js";
 import favoriteRouter from "./src/routes/user/favorite-routes.js";
 import adminRouter from "./src/routes/admin/admin-routes.js";
 import { getIPAddress } from "./src/utils/ipConfig.js";
+import cors from "cors";
+
 // import { setupSwagger } from "./src/utils/swaggerConfig.js";
 import swaggerUi from 'swagger-ui-express';
 // import swaggerDocument from './src/utils/swagger-output.json';
@@ -27,6 +29,8 @@ connectDB();
 
 const app = express();
 const upload = multer();
+
+app.use(cors());
 
 // Middleware configuration
 app.use(express.json());
