@@ -70,6 +70,53 @@ const registerUser = asyncHandler(async (req, res) => {
   }
 });
 
+const createUser = asyncHandler(async (req, res) => {
+  const { name, email, password, isAdmin, address } = req.body;
+
+  // Validate required fields
+  if (!name || !email || !password) {
+    res.status(400).json({ message: "Tên, email và mật khẩu là bắt buộc" });
+    throw new Error("Tên, email và mật khẩu là bắt buộc");
+  }
+
+  // Check if user already exists
+  const userExists = await User.findOne({ email });
+  if (userExists) {
+    res.status(400).json({ message: "Người dùng đã tồn tại" });
+    throw new Error("Người dùng đã tồn tại");
+  }
+
+  // Create new user
+  const user = await User.create({
+    name,
+    email,
+    password,
+    isAdmin: isAdmin || false, // Default to false if isAdmin is not provided
+    address: address || ""
+  });
+
+  if (user) {
+    // Generate OTP for email verification
+    await generateOtpAndSendEmail({
+      email: email,
+      isVerifiedEmail: true,
+      isForgotPassword: false,
+    });
+
+    res.status(201).json({
+      _id: user._id,
+      name: user.name,
+      email: user.email,
+      isAdmin: user.isAdmin,
+      token: generateToken(user._id),
+      message: "Người dùng được tạo thành công. Vui lòng xác thực email.",
+    });
+  } else {
+    res.status(400).json({ message: "Dữ liệu người dùng không hợp lệ" });
+    throw new Error("Dữ liệu người dùng không hợp lệ");
+  }
+});
+
 const verifyOtpEmail = async (req, res) => {
   const { email, otp } = req.body;
 
@@ -278,14 +325,15 @@ const deleteUser = asyncHandler(async (req, res) => {
 });
 
 const updateUserRole = asyncHandler(async (req, res) => {
-  const user = await User.findById(req.params.id);
+  const { id, isAdmin } = req.body;
+  const user = await User.findById(id);
 
   if (!user) {
     res.status(404);
     throw new Error("Không tìm thấy người dùng");
   }
 
-  user.isAdmin = req.body.isAdmin;
+  user.isAdmin = isAdmin;
   await user.save();
 
   res.status(200).json({ message: "Cập nhật vai trò người dùng thành công" });
@@ -294,6 +342,7 @@ const updateUserRole = asyncHandler(async (req, res) => {
 export {
   login,
   registerUser,
+  createUser,
   getProfileUser,
   forgotPassword,
   verifyOtpEmail,

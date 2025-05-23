@@ -28,6 +28,8 @@ export async function generateOtpAndSendEmail({email, isVerifiedEmail = false, i
     }
 
     const userId = user._id;
+    console.log('userId', userId);
+    
     await Otp.findOneAndDelete({ userId: userId, typeOtp: textTypeOtp });
     const otp = generateOtp();
 
