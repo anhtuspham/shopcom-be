@@ -312,6 +312,56 @@ const updateUserProfile = asyncHandler(async (req, res) => {
   });
 });
 
+const updateUserByAdmin = asyncHandler(async (req, res) => {
+  const { id, name, email, password, isAdmin, address } = req.body;
+
+  const user = await User.findById(id);
+
+  if (!user) {
+    res.status(404).json({ message: "Không tìm thấy người dùng" });
+    throw new Error("Không tìm thấy người dùng");
+  }
+
+  // Check if email is being updated and already exists for another user
+  if (email && email !== user.email) {
+    const emailExists = await User.findOne({ email });
+    if (emailExists && emailExists._id.toString() !== userId) {
+      res.status(400).json({ message: "Email đã được sử dụng" });
+      throw new Error("Email đã được sử dụng");
+    }
+    user.email = email;
+    user.isVerifiedEmail = false; // Reset email verification
+    await generateOtpAndSendEmail({
+      email: email,
+      isVerifiedEmail: true,
+      isForgotPassword: false,
+    });
+  }
+
+  // Update fields if provided
+  user.name = name || user.name;
+  
+  if (password) {
+    user.password = password;
+    user.markModified("password");
+  }
+  user.address = address || user.address;
+  user.isAdmin = typeof isAdmin === "boolean" ? isAdmin : user.isAdmin;
+
+  const updatedUser = await user.save();
+
+  res.status(200).json({
+    _id: updatedUser._id,
+    name: updatedUser.name,
+    email: updatedUser.email,
+    address: updatedUser.address,
+    isAdmin: updatedUser.isAdmin,
+    message: email && email !== user.email 
+      ? "Cập nhật người dùng thành công. Vui lòng xác thực email mới."
+      : "Cập nhật người dùng thành công",
+  });
+})
+
 const deleteUser = asyncHandler(async (req, res) => {
   const user = await User.findById(req.params.id);
 
@@ -353,5 +403,6 @@ export {
   getAllUsers,
   updateUserProfile,
   deleteUser,
-  updateUserRole
+  updateUserRole,
+  updateUserByAdmin
 };

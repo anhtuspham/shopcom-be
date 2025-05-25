@@ -138,7 +138,8 @@ const confirmPayment = asyncHandler(async (req, res) => {
 const getAllOrders = asyncHandler(async (req, res) => {
   const orders = await Order.find()
     .populate("userId", "name email")
-    .populate("products.productId", "name brand");
+    .populate("products.productId", "name brand")
+    .populate("coupon", "code discountType discountValue minOrderValue expirationDate");
   res.status(200).json(orders);
 });
 

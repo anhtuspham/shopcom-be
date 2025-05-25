@@ -1,7 +1,7 @@
 import express from "express";
 import { protect, admin } from "../../middleware/auth-middleware.js";
 import { updateOrderStatus, getAllOrders } from "../../controllers/order-controller.js"
-import { getAllUsers, deleteUser, updateUserRole, createUser } from "../../controllers/user-controller.js";
+import { getAllUsers, deleteUser, updateUserRole, createUser, updateUserByAdmin } from "../../controllers/user-controller.js";
 import { createCoupon, deleteCoupon, getAllCoupons, updateCoupon } from "../../controllers/coupon-controller.js";
 
 const router = express.Router();
@@ -12,9 +12,11 @@ const router = express.Router();
  *   - name: Admin
  *     description: Quyền admin
  */
-// user
+// user 
+// api/admin/
 router.get("/user/get-all-user", protect, admin, getAllUsers);
 router.post("/user/create", protect, admin, createUser);
+router.post("/user/update", protect, admin, updateUserByAdmin);
 router.delete("/user/:id", protect, admin, deleteUser);
 router.put("/user/role", protect, admin, updateUserRole); 
 
