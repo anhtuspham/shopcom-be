@@ -47,7 +47,7 @@ const deleteCoupon = asyncHandler(async (req, res) => {
   if (!coupon)
     return res.status(404).json({ message: "Không tìm thấy coupon" });
 
-  await coupon.remove();
+  await coupon.deleteOne();
   res.json({ message: "Xóa coupon thành công" });
 });
 

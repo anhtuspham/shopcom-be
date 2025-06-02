@@ -75,7 +75,7 @@ const createProduct = asyncHandler(async (req, res) => {
 
     res
       .status(201)
-      .json({ message: "Sản phẩm đã được thêm thành công", data: newProduct });
+      .json(newProduct);
   } catch (e) {
     console.error(e);
     return res.status(404).json({ message: "Có lỗi xảy ra" });
