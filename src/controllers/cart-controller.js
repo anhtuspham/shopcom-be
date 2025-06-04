@@ -76,13 +76,14 @@ const addProductToCart = asyncHandler(async (req, res) => {
 
     if (productIndex !== -1) {
       // san pham da co trong gio hang
+      
+      cart.products[productIndex].quantity += parseInt(quantity);
       if (cart.products[productIndex].quantity > variant.quantity) {
         return res.status(400).json({
           message: "Số lượng sản phẩm trong giỏ hàng vượt quá số lượng tồn kho",
         });
       }
 
-      cart.products[productIndex].quantity += parseInt(quantity);
       if (cart.products[productIndex].quantity < 1) {
         cart.products = cart.products.filter(
           (p) =>
