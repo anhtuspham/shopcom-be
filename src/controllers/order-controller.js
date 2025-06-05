@@ -12,7 +12,10 @@ import Coupon from "../models/Coupon.js";
 
 const createOrder = asyncHandler(async (req, res) => {
   const userId = req.user._id;
-  const { paymentMethod, couponCode } = req.body;
+  const { paymentMethod, couponCode, isPaid } = req.body;
+
+  console.log('isPaid', isPaid);
+  
 
   // Lấy giỏ hàng của user
   const cart = await Cart.findOne({ userId }).populate("products.productId");
@@ -104,6 +107,7 @@ const createOrder = asyncHandler(async (req, res) => {
     totalAmount: cart.totalPrice,
     discountAmount: discount,
     finalAmount,
+    isPaid: isPaid || false,
     coupon: appliedCouponId,
     paymentMethod,
   });
@@ -214,10 +218,17 @@ const cancelOrder = asyncHandler(async (req, res) => {
 const createPaymentIntent = asyncHandler(async (req, res) => {
   try {
     const { amount, currency } = req.body;
+    if(!amount || !currency) {
+      return res.status(400).json({ error: "Amount and currency are required" });
+    }
+    // if(currency == "VND") {
+    //   return amount = amount * 25980; // Chuyển đổi VND sang USD (giả sử tỷ giá 1 USD = 25980 VND)
+    // }
 
     const paymentIntent = await stripe.paymentIntents.create({
-      amount: amount * 100,
+      amount: amount,
       currency,
+      payment_method_types: ["card"],
     });
 
     res.json({ clientSecret: paymentIntent.client_secret });

@@ -314,9 +314,7 @@ const removeFavorite = asyncHandler(async (req, res) => {
   res.status(200).json({ message: "Đã xóa khỏi danh sách yêu thích" });
 });
 
-const getFavorites = asyncHandler(async (req, res) => {
-  console.log("Fetching favorites for user:", req.user._id);
-  
+const getFavorites = asyncHandler(async (req, res) => {  
   const userId = req.user._id;
   const favorite = await Favorite.findOne({ userId }).populate("productIds");
 
