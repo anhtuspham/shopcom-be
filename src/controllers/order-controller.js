@@ -221,9 +221,6 @@ const createPaymentIntent = asyncHandler(async (req, res) => {
     if(!amount || !currency) {
       return res.status(400).json({ error: "Amount and currency are required" });
     }
-    // if(currency == "VND") {
-    //   return amount = amount * 25980; // Chuyển đổi VND sang USD (giả sử tỷ giá 1 USD = 25980 VND)
-    // }
 
     const paymentIntent = await stripe.paymentIntents.create({
       amount: amount,
