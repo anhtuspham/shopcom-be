@@ -9,13 +9,13 @@ import Order from "../models/Order.js";
 import User from "../models/User.js";
 import Product from "../models/Product.js";
 import Coupon from "../models/Coupon.js";
+import { recordAction } from "../utils/recommend-system.js";
 
 const createOrder = asyncHandler(async (req, res) => {
   const userId = req.user._id;
   const { paymentMethod, couponCode, isPaid } = req.body;
 
-  console.log('isPaid', isPaid);
-  
+  console.log("isPaid", isPaid);
 
   // Lấy giỏ hàng của user
   const cart = await Cart.findOne({ userId }).populate("products.productId");
@@ -113,6 +113,9 @@ const createOrder = asyncHandler(async (req, res) => {
   });
 
   await order.save();
+  for (const item of order.products) {
+    await recordAction(userId, item.productId._id, "purchase");
+  }
 
   // Xóa giỏ hàng sau khi đặt hàng thành công
   await Cart.findOneAndDelete({ userId });
@@ -143,7 +146,10 @@ const getAllOrders = asyncHandler(async (req, res) => {
   const orders = await Order.find()
     .populate("userId", "name email")
     .populate("products.productId", "name brand")
-    .populate("coupon", "code discountType discountValue minOrderValue expirationDate");
+    .populate(
+      "coupon",
+      "code discountType discountValue minOrderValue expirationDate"
+    );
   res.status(200).json(orders);
 });
 
@@ -184,11 +190,13 @@ const getOrderById = asyncHandler(async (req, res) => {
   }
 
   if (order.userId.toString() !== userId.toString()) {
-    return res.status(403).json({ message: "Không có quyền truy cập đơn hàng này" });
+    return res
+      .status(403)
+      .json({ message: "Không có quyền truy cập đơn hàng này" });
   }
 
   res.status(200).json(order);
-})
+});
 
 const cancelOrder = asyncHandler(async (req, res) => {
   const { orderId } = req.params;
@@ -218,8 +226,10 @@ const cancelOrder = asyncHandler(async (req, res) => {
 const createPaymentIntent = asyncHandler(async (req, res) => {
   try {
     const { amount, currency } = req.body;
-    if(!amount || !currency) {
-      return res.status(400).json({ error: "Amount and currency are required" });
+    if (!amount || !currency) {
+      return res
+        .status(400)
+        .json({ error: "Amount and currency are required" });
     }
 
     const paymentIntent = await stripe.paymentIntents.create({
@@ -242,5 +252,5 @@ export {
   getUserOrders,
   cancelOrder,
   createPaymentIntent,
-  getOrderById
+  getOrderById,
 };

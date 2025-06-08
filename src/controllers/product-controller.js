@@ -5,6 +5,7 @@ import fs from "fs";
 import { promisify } from "util";
 import Review from "../models/Review.js";
 import Favorite from "../models/Favorite.js";
+import { recordAction } from "../utils/recommend-system.js"
 
 const unlinkAsync = promisify(fs.unlink);
 
@@ -192,9 +193,14 @@ const deleteProduct = asyncHandler(async (req, res) => {
 const productDetail = asyncHandler(async (req, res) => {
   const { id } = req.params;
   const product = await Product.findById(id);
+  const userId = req.user?._id; 
 
   if (!product) {
     return res.status(404).json({ message: "Sản phẩm không tồn tại" });
+  }
+
+  if (userId) {
+    await recordAction(userId, id, "view");
   }
 
   return res.status(200).json(product);
@@ -230,6 +236,8 @@ const reviewProduct = asyncHandler(async (req, res) => {
   if (!newReview) {
     return res.status(500).json({ message: "Có lỗi khi tạo đánh giá" });
   }
+
+  await recordAction(userId, productId, "review");
 
   const reviews = await Review.find({ productId });
   const totalRatings = reviews.reduce((acc, review) => acc + review.rating, 0);

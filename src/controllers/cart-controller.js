@@ -1,6 +1,7 @@
 import asyncHandler from "express-async-handler";
 import Cart from "../models/Cart.js";
 import Product from "../models/Product.js";
+import { recordAction } from "../utils/recommend-system.js";
 
 // add product to cart
 const addProductToCart = asyncHandler(async (req, res) => {
@@ -113,6 +114,7 @@ const addProductToCart = asyncHandler(async (req, res) => {
   );
 
   await cart.save();
+  await recordAction(userId, productId, "addToCart");
   res.status(200).json({ message: "Cập nhật giỏ hàng thành công", cart });
 });
 
