@@ -19,6 +19,7 @@ import cors from "cors";
 
 import swaggerUi from 'swagger-ui-express';
 const swaggerDocument = JSON.parse(fs.readFileSync('./src/utils/swagger-output.json', 'utf-8'));
+import { trainAndSaveModel } from "./src/utils/recommendation.js";
 import "./src/utils/cron.js";
 
 const IP = getIPAddress();

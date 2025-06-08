@@ -143,7 +143,7 @@ export async function getRecommendations(userId) {
     const productDetails = await Product.find({ _id: { $in: normalizedRecommendations.map(r => r.productId) } });
     return normalizedRecommendations.map(r => {
       const product = productDetails.find(p => p._id.toString() === r.productId);
-      return { productId: r.productId, name: product.name, score: r.score };
+      return { _id: r.productId, name: product.name, brand: product.brand, defaultVariant: product.defaultVariant, ratings: product.ratings, score: r.score };
     });
   } catch (error) {
     console.error('Error in getRecommendations:', error);

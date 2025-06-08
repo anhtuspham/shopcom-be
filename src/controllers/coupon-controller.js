@@ -56,6 +56,18 @@ const getAllCoupons = asyncHandler(async (req, res) => {
   res.json(coupons);
 });
 
+const getCouponByCode = asyncHandler(async (req, res) => {
+  const { couponCode } = req.body;
+  const coupon = await Coupon.findOne({
+    code: couponCode?.toUpperCase(),
+    isActive: true,
+  });
+  if (!coupon) {
+    return res.status(404).json({ message: "Không tìm thấy mã giảm giá" });
+  }
+  res.json(coupon);
+})
+
 const applyCoupon = asyncHandler(async (req, res) => {
   const { code, cartTotal } = req.body;
 
@@ -101,4 +113,4 @@ const applyCoupon = asyncHandler(async (req, res) => {
   });
 });
 
-export { applyCoupon, createCoupon, updateCoupon, deleteCoupon, getAllCoupons };
+export { applyCoupon, createCoupon, updateCoupon, deleteCoupon, getAllCoupons, getCouponByCode };

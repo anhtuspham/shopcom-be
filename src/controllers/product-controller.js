@@ -237,7 +237,7 @@ const reviewProduct = asyncHandler(async (req, res) => {
     return res.status(500).json({ message: "Có lỗi khi tạo đánh giá" });
   }
 
-  await recordAction(userId, productId, "review");
+  await recordAction(userId, productId, "rate");
 
   const reviews = await Review.find({ productId });
   const totalRatings = reviews.reduce((acc, review) => acc + review.rating, 0);

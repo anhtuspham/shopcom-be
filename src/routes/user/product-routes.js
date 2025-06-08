@@ -11,10 +11,10 @@ import {
   deleteReview,
   addFavorite,
   removeFavorite,
-  getFavorites
+  getFavorites,
 } from "../../controllers/product-controller.js";
 import upload from "../../middleware/multer.js";
-import { applyCoupon } from "../../controllers/coupon-controller.js";
+import { applyCoupon, getCouponByCode } from "../../controllers/coupon-controller.js";
 
 const router = express.Router();
 
@@ -35,6 +35,7 @@ router.delete("/delete-review", protect, deleteReview);
 
 // coupon
 router.post("/apply-coupon", protect, applyCoupon);
+router.get("/get-coupon", protect, getCouponByCode)
 
 // productDetail
 router.get("/get/:id", protect, productDetail);

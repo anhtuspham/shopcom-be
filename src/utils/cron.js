@@ -1,10 +1,10 @@
 import cron from "node-cron";
+import UserAction from "../models/UserAction.js"
 import { trainAndSaveModel, decayScores } from "./recommendation.js";
 
 cron.schedule("0 * * * *", async () => {
   console.log("Running hourly model training and score decay...");
   try {
-    // Kiểm tra thời gian cập nhật cuối cùng của useractions
     const lastAction = await UserAction.findOne().sort({ updatedAt: -1 });
     const lastUpdate = lastAction ? lastAction.updatedAt : new Date(0);
     const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000);
