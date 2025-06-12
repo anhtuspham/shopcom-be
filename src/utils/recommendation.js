@@ -120,10 +120,12 @@ export async function getRecommendations(userId) {
   try {
     const { userEmbedding, productEmbedding, userIds, productIds } = await loadModel();
     const userIndex = userIds.indexOf(userId.toString());
-
+    
     if (userIndex === -1) {
       const products = await Product.find().sort({ 'ratings.average': -1 }).limit(10);
-      return products.map(p => ({ productId: p._id, name: p.name, score: p.ratings.average }));
+      
+      return products.map(p => ({ _id: p.productId, name: p.name, brand: p.brand, defaultVariant: p.defaultVariant, ratings: p.ratings, score: p.score }));
+      // return products.map(p => ({ productId: p._id, name: p.name, score: p.ratings.average }));
     }
 
     const predictions = tf.matMul(userEmbedding.slice([userIndex, 0], [1, -1]), productEmbedding.transpose());
