@@ -2,7 +2,7 @@ import asyncHandler from 'express-async-handler';
 import Product from '../models/Product.js';
 
 const getProducts = asyncHandler(async (req, res) => {
-    const { page = 1, limit = 10, category, brand, search, sort } = req.query;
+    const { page = 1, limit = 20, category, brand, search, sort } = req.query;
   
     const query = {};
   
