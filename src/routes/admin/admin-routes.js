@@ -26,7 +26,7 @@ router.put("/order/:orderId/status", protect, admin, updateOrderStatus);
 router.get("/order/get-all-order", protect, admin, getAllOrders);
 
 // coupon
-router.get("/coupon", protect, admin, getAllCoupons);
+router.get("/coupon", protect, getAllCoupons);
 router.post("/coupon", protect, admin, createCoupon);
 router.put("/coupon/:id", protect, admin, updateCoupon);
 router.delete("/coupon/:id", protect, admin, deleteCoupon);
